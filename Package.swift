@@ -4,6 +4,10 @@ import PackageDescription
 
 let package = Package(
     name: "ZipUtl",
+    platforms: [
+        .macOS("14.0.0"),
+        .iOS("18.0.0")
+    ],
     products: [
         .library(
             name: "ZipUtl",
