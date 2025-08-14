@@ -5,8 +5,6 @@ struct DemoEditView: View {
     @ObservedObject var fileManager: IdentifiableFileManager
     @Binding var alertFlag: Bool
     @Binding var alertMsg: String
-
-    public init() {}
     
     var body: some View {
         VStack {
