@@ -275,7 +275,11 @@ public class ZipUtl {
     
     public func saveAs(url: URL) async throws {
         let bin = await self.build()
-        try bin.write(to: url)
+        do {
+            try bin.write(to: url)
+        }catch {
+            throw ZipError(msg: "Faied to save")
+        }
     }
 }
 
