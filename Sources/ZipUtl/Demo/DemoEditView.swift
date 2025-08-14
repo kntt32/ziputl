@@ -1,35 +1,12 @@
 import SwiftUI
 
-func addNewFile(result: Result<URL, any Error>, fileManager: IdentifiableFileManager, alertFlag: inout Bool, alertMsg: inout String) {
-    switch result {
-    case .success(let url):
-        if url.startAccessingSecurityScopedResource() {
-            defer { url.stopAccessingSecurityScopedResource() }
-            
-            do {
-                let file = try ZipUtl.File(url: url)
-                withAnimation {
-                    fileManager.append(file: IdentifiableFile(file: file))
-                }
-            }catch(let zipError) {
-                alertMsg = (zipError as! ZipError).msg
-                alertFlag = true
-            }
-        }else {
-            alertMsg = "Failed to access"
-            alertFlag = true
-        }
-    case .failure(_):
-        alertMsg = "Failed to add new file"
-        alertFlag = true
-    }
-}
-
 struct DemoEditView: View {
     @State private var fileImportFlag = false
     @ObservedObject var fileManager: IdentifiableFileManager
     @Binding var alertFlag: Bool
     @Binding var alertMsg: String
+
+    public init() {}
     
     var body: some View {
         VStack {
@@ -70,4 +47,27 @@ struct DemoEditView: View {
     }
 }
 
-
+func addNewFile(result: Result<URL, any Error>, fileManager: IdentifiableFileManager, alertFlag: inout Bool, alertMsg: inout String) {
+    switch result {
+    case .success(let url):
+        if url.startAccessingSecurityScopedResource() {
+            defer { url.stopAccessingSecurityScopedResource() }
+            
+            do {
+                let file = try ZipUtl.File(url: url)
+                withAnimation {
+                    fileManager.append(file: IdentifiableFile(file: file))
+                }
+            }catch(let zipError) {
+                alertMsg = (zipError as! ZipError).msg
+                alertFlag = true
+            }
+        }else {
+            alertMsg = "Failed to access"
+            alertFlag = true
+        }
+    case .failure(_):
+        alertMsg = "Failed to add new file"
+        alertFlag = true
+    }
+}
