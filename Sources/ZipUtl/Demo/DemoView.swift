@@ -1,56 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-func importZipFile(result: Result<URL, any Error>, fileManager: IdentifiableFileManager, alertFlag: inout Bool, alertMsg: inout String) {
-    switch result {
-    case .success(let url):
-        do {
-            if url.startAccessingSecurityScopedResource() {
-                defer { url.stopAccessingSecurityScopedResource() }
-                let ziputl = try ZipUtl(from: url)
-                let files = try ziputl.extract()
-                for file in files {
-                    fileManager.append(file: IdentifiableFile(file: file))
-                }
-            }else {
-                alertMsg = "Failed to access"
-                alertFlag = true
-            }
-        }catch(let zipError) {
-            alertMsg = (zipError as! ZipError).msg
-            alertFlag = true
-        }
-    case .failure(_):
-        alertMsg = "Failed to import"
-        alertFlag = true
-    }
-}
-
-struct ZipDocument: FileDocument {
-    static var readableContentTypes: [UTType] = [.zip]
-    var data: Data
-    
-    init(data: Data) {
-        self.data = data
-    }
-    
-    init(configuration: ReadConfiguration) throws {
-        guard let data = configuration.file.regularFileContents else {
-            throw NSError(
-                domain: "ZipUtlDemo",
-                code: 1,
-                userInfo: [NSLocalizedDescriptionKey: "Failed to get regularFileContent"]
-            )
-        }
-        
-        self.data = data
-    }
-    
-    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
-        .init(regularFileWithContents: self.data)
-    }
-}
-
 public struct DemoView: View {
     @StateObject private var fileManager = IdentifiableFileManager()
     @State private var zipImportFlag = false
@@ -59,6 +9,8 @@ public struct DemoView: View {
     @State private var alertFlag = false
     @State private var alertMsg = "errmsg"
     @State private var progressFlag = false
+
+    public init() {}
     
     public var body: some View {
         VStack {
@@ -114,3 +66,55 @@ public struct DemoView: View {
             })
     }
 }
+
+func importZipFile(result: Result<URL, any Error>, fileManager: IdentifiableFileManager, alertFlag: inout Bool, alertMsg: inout String) {
+    switch result {
+    case .success(let url):
+        do {
+            if url.startAccessingSecurityScopedResource() {
+                defer { url.stopAccessingSecurityScopedResource() }
+                let ziputl = try ZipUtl(from: url)
+                let files = try ziputl.extract()
+                for file in files {
+                    fileManager.append(file: IdentifiableFile(file: file))
+                }
+            }else {
+                alertMsg = "Failed to access"
+                alertFlag = true
+            }
+        }catch(let zipError) {
+            alertMsg = (zipError as! ZipError).msg
+            alertFlag = true
+        }
+    case .failure(_):
+        alertMsg = "Failed to import"
+        alertFlag = true
+    }
+}
+
+struct ZipDocument: FileDocument {
+    static var readableContentTypes: [UTType] = [.zip]
+    var data: Data
+    
+    init(data: Data) {
+        self.data = data
+    }
+    
+    init(configuration: ReadConfiguration) throws {
+        guard let data = configuration.file.regularFileContents else {
+            throw NSError(
+                domain: "ZipUtlDemo",
+                code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "Failed to get regularFileContent"]
+            )
+        }
+        
+        self.data = data
+    }
+    
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        .init(regularFileWithContents: self.data)
+    }
+}
+
+
